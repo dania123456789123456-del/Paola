@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Panel de Inicio</title>
+<style>
+  :root{
+    --glass-bg: rgba(255,255,255,0.10);
+    --glass-bg-hover: rgba(255,255,255,0.18);
+    --glass-border: rgba(255,255,255,0.28);
+    --glass-shadow: 0 8px 32px rgba(0,0,0,0.35);
+    --text-main: #f5f6fa;
+    --text-sub: rgba(245,246,250,0.65);
+    --accent-a: #0a84ff;
+    --accent-b: #5e5ce6;
+    --accent-c: #ff9f0a;
+    --accent-d: #ff375f;
+  }
+
+  *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+
+  html,body{
+    height:100%;
+    margin:0;
+    font-family:-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+    color:var(--text-main);
+  }
+
+  body{
+    /* Puedes poner tu propia imagen de fondo aquí (link directo a una imagen) */
+    background:
+      linear-gradient(180deg, rgba(10,12,20,0.55), rgba(10,12,20,0.85)),
+      url("") center/cover no-repeat fixed,
+      radial-gradient(circle at 20% 20%, #2b3350 0%, #0d0f18 55%, #050608 100%);
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:32px 0 60px;
+    overflow-x:hidden;
+  }
+
+  header{
+    text-align:center;
+    margin-bottom:34px;
+    margin-top:env(safe-area-inset-top, 10px);
+    padding:0 20px;
+  }
+
+  header h1{
+    font-size:28px;
+    font-weight:700;
+    margin:0 0 6px;
+    letter-spacing:0.3px;
+  }
+
+  header p{
+    margin:0;
+    font-size:14px;
+    color:var(--text-sub);
+  }
+
+  /* ---------- Grid horizontal ---------- */
+  .grid{
+    width:100%;
+    display:flex;
+    flex-direction:row;
+    gap:16px;
+    padding:6px 20px 20px;
+    overflow-x:auto;
+    scroll-snap-type:x mandatory;
+    -webkit-overflow-scrolling:touch;
+  }
+
+  .grid::-webkit-scrollbar{ display:none; }
+
+  .card{
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    justify-content:flex-end;
+    min-width:78%;
+    max-width:280px;
+    min-height:190px;
+    padding:22px;
+    border-radius:28px;
+    background:var(--glass-bg);
+    border:1px solid var(--glass-border);
+    backdrop-filter:blur(22px) saturate(180%);
+    -webkit-backdrop-filter:blur(22px) saturate(180%);
+    box-shadow:var(--glass-shadow);
+    cursor:pointer;
+    text-decoration:none;
+    color:var(--text-main);
+    overflow:hidden;
+    transition:transform .18s ease, background .18s ease;
+    -webkit-user-select:none;
+    user-select:none;
+    scroll-snap-align:center;
+    flex:0 0 auto;
+  }
+
+  @media (min-width:560px){
+    .card{ min-width:240px; }
+  }
+
+  .card::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:linear-gradient(135deg, rgba(255,255,255,0.18), rgba(255,255,255,0) 45%);
+    pointer-events:none;
+  }
+
+  .card::after{
+    content:"";
+    position:absolute;
+    width:180px;
+    height:180px;
+    border-radius:50%;
+    top:-70px;
+    right:-60px;
+    background:radial-gradient(circle, var(--glow-color, rgba(10,132,255,0.35)), transparent 70%);
+    filter:blur(10px);
+    pointer-events:none;
+  }
+
+  .card:active{
+    transform:scale(0.97);
+    background:var(--glass-bg-hover);
+  }
+
+  .icon-badge{
+    width:58px;
+    height:58px;
+    border-radius:18px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin-bottom:16px;
+    background:linear-gradient(135deg, var(--badge-a), var(--badge-b));
+    box-shadow:0 6px 18px rgba(0,0,0,0.35), inset 0 1px 1px rgba(255,255,255,0.4);
+    position:relative;
+    z-index:1;
+  }
+
+  .icon-badge svg{
+    width:28px;
+    height:28px;
+    stroke:#fff;
+    fill:none;
+    stroke-width:1.8;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+  }
+
+  .card .title{
+    font-size:18px;
+    font-weight:700;
+    position:relative;
+    z-index:1;
+  }
+
+  .card .subtitle{
+    font-size:12.5px;
+    color:var(--text-sub);
+    margin-top:3px;
+    position:relative;
+    z-index:1;
+  }
+
+  .card .arrow{
+    position:absolute;
+    top:20px;
+    right:20px;
+    width:30px;
+    height:30px;
+    border-radius:50%;
+    background:rgba(255,255,255,0.12);
+    border:1px solid rgba(255,255,255,0.25);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:14px;
+    z-index:1;
+  }
+
+  .card.add-new{
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    background:rgba(255,255,255,0.05);
+    border:1.5px dashed rgba(255,255,255,0.25);
+  }
+
+  .card.add-new .icon-badge{ background:rgba(255,255,255,0.08); box-shadow:none; }
+  .card.add-new .title{ color:var(--text-sub); font-weight:500; font-size:14px; }
+
+  .empty-msg{
+    color:var(--text-sub);
+    font-size:13px;
+    text-align:center;
+    margin-top:40px;
+    max-width:320px;
+    line-height:1.5;
+  }
+
+  footer{
+    margin-top:30px;
+    font-size:11px;
+    color:rgba(245,246,250,0.35);
+    text-align:center;
+  }
+</style>
+</head>
+<body>
+
+  <header>
+    <h1>Panel de Inicio</h1>
+    <p>Desliza para ver más opciones</p>
+  </header>
+
+  <div class="grid" id="grid"></div>
+  <div class="empty-msg" id="emptyMsg" style="display:none">
+    No se pudo cargar <code>sections.json</code>. Verifica que el archivo exista en el mismo repositorio.
+  </div>
+
+  <footer>Alojado en GitHub Pages</footer>
+
+<script>
+/*
+  ============================================================
+  sections.json define las tarjetas de este panel.
+  Cada objeto tiene:
+    id        -> identificador único
+    title     -> nombre visible
+    subtitle  -> texto pequeño debajo (opcional)
+    icon      -> "globe" | "book" | "game" | "grid"  (o cualquier clave de ICONS de abajo)
+    color     -> clave de paleta de color del badge: "blue" | "purple" | "orange" | "pink"
+    type      -> "viewer"  -> abre visor.html con una lista de sitios (usa dataFile)
+                 "redirect"-> va directo a "url" (para el libro PDF, un mini juego, etc.)
+    dataFile  -> (solo type "viewer") nombre del JSON con la lista de links
+    url       -> (solo type "redirect") link directo de la página en GitHub Pages
+    hidden    -> true/false -> si es true, la tarjeta NO se muestra en el panel
+                 (útil para tener ya listo un apartado, como un mini juego,
+                 y activarlo después solo cambiando este valor a false)
+
+  Para agregar un nuevo apartado (ej. un mini juego) agrega un objeto nuevo
+  a sections.json (puedes dejarlo con "hidden": true hasta que quieras
+  mostrarlo), sin tocar este archivo.
+  ============================================================
+*/
+
+// Cambia esto a true si quieres que además se muestre siempre una tarjeta
+// fantasma "+" recordando que se pueden agregar más apartados.
+const SHOW_ADD_PLACEHOLDER = false;
+
+const ICONS = {
+  globe: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.8 3 2.8 15 0 18"/><path d="M12 3c-2.8 3-2.8 15 0 18"/></svg>`,
+  book: `<svg viewBox="0 0 24 24"><path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17.5H6.5A2.5 2.5 0 0 0 4 22V4.5Z"/><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/></svg>`,
+  game: `<svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="10" rx="5"/><path d="M7 10v4M5 12h4"/><circle cx="15" cy="10.5" r="1"/><circle cx="17.5" cy="13" r="1"/></svg>`,
+  grid: `<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>`
+};
+
+const COLORS = {
+  blue:   ["#0a84ff", "#5e5ce6"],
+  purple: ["#5e5ce6", "#bf5af2"],
+  orange: ["#ff9f0a", "#ff453a"],
+  pink:   ["#ff375f", "#ff9f0a"]
+};
+
+const FALLBACK_SECTIONS = {
+  sections: [
+    {
+      id: "web-viewer",
+      title: "Visualizador Web",
+      subtitle: "Páginas y código en GitHub",
+      icon: "globe",
+      color: "blue",
+      type: "viewer",
+      dataFile: "sitios.json"
+    },
+    {
+      id: "pdf-book",
+      title: "Visor de Libro PDF",
+      subtitle: "BookLeaf Reader",
+      icon: "book",
+      color: "orange",
+      type: "redirect",
+      url: "https://TU-USUARIO.github.io/TU-REPO-BOOKLEAF/"
+    },
+    {
+      id: "mini-game",
+      title: "Mini Juego",
+      subtitle: "Próximamente",
+      icon: "game",
+      color: "purple",
+      type: "redirect",
+      url: "",
+      hidden: true
+    }
+  ]
+};
+
+async function loadSections(){
+  try{
+    const res = await fetch("sections.json", { cache: "no-store" });
+    if(!res.ok) throw new Error("no-ok");
+    const data = await res.json();
+    render(data.sections || []);
+  }catch(e){
+    // Si se abre el archivo localmente (file://) el fetch puede fallar por CORS.
+    // En GitHub Pages (https) esto funciona sin problema.
+    render(FALLBACK_SECTIONS.sections);
+  }
+}
+
+function render(sections){
+  const grid = document.getElementById("grid");
+  grid.innerHTML = "";
+
+  const visible = sections.filter(s => !s.hidden);
+
+  if(!visible.length){
+    document.getElementById("emptyMsg").style.display = "block";
+    return;
+  }
+
+  visible.forEach(sec => {
+    const palette = COLORS[sec.color] || COLORS.blue;
+    const card = document.createElement("a");
+    card.className = "card";
+    card.href = "javascript:void(0)";
+    card.style.setProperty("--badge-a", palette[0]);
+    card.style.setProperty("--badge-b", palette[1]);
+    card.style.setProperty("--glow-color", palette[0] + "59");
+    card.onclick = () => openSection(sec);
+
+    card.innerHTML = `
+      <div class="arrow">›</div>
+      <div class="icon-badge">${ICONS[sec.icon] || ICONS.grid}</div>
+      <div class="title">${sec.title || "Sin título"}</div>
+      ${sec.subtitle ? `<div class="subtitle">${sec.subtitle}</div>` : ""}
+    `;
+    grid.appendChild(card);
+  });
+
+  if(SHOW_ADD_PLACEHOLDER){
+    const addCard = document.createElement("div");
+    addCard.className = "card add-new";
+    addCard.innerHTML = `
+      <div class="icon-badge">➕</div>
+      <div class="title">Agrega más apartados<br>editando sections.json</div>
+    `;
+    grid.appendChild(addCard);
+  }
+}
+
+function openSection(sec){
+  if(sec.type === "redirect" && sec.url){
+    window.location.href = sec.url;
+  }else if(sec.type === "viewer"){
+    const file = encodeURIComponent(sec.dataFile || "sitios.json");
+    const title = encodeURIComponent(sec.title || "Visualizador");
+    window.location.href = `visor.html?data=${file}&title=${title}`;
+  }
+}
+
+loadSections();
+</script>
+</body>
+</html>
