@@ -1,0 +1,12 @@
+{
+  "sitios": [
+    {
+      "nombre": "Ejemplo: Sistema de Inventario",
+      "url": "https://TU-USUARIO.github.io/TU-REPO-INVENTARIO/"
+    },
+    {
+      "nombre": "Ejemplo: Control Vehicular",
+      "url": "https://TU-USUARIO.github.io/TU-REPO-VEHICULOS/"
+    }
+  ]
+}

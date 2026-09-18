@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Visualizador</title>
+<style>
+  :root{
+    --glass-bg: rgba(255,255,255,0.10);
+    --glass-bg-hover: rgba(255,255,255,0.18);
+    --glass-border: rgba(255,255,255,0.28);
+    --glass-shadow: 0 8px 32px rgba(0,0,0,0.35);
+    --text-main: #f5f6fa;
+    --text-sub: rgba(245,246,250,0.65);
+  }
+
+  *{ box-sizing:border-box; -webkit-tap-highlight-color: transparent; }
+
+  html,body{ height:100%; margin:0; font-family:-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif; color:var(--text-main); }
+
+  body{
+    background: radial-gradient(circle at 20% 20%, #2b3350 0%, #0d0f18 55%, #050608 100%);
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+
+  /* ---------- Barra superior (lista de sitios) ---------- */
+  .topbar{
+    width:100%;
+    max-width:560px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:14px 18px;
+    padding-top:calc(14px + env(safe-area-inset-top, 0px));
+  }
+
+  .btn-glass{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:40px;
+    height:40px;
+    border-radius:14px;
+    background:var(--glass-bg);
+    border:1px solid var(--glass-border);
+    backdrop-filter:blur(20px) saturate(180%);
+    -webkit-backdrop-filter:blur(20px) saturate(180%);
+    box-shadow:var(--glass-shadow);
+    color:var(--text-main);
+    font-size:18px;
+    cursor:pointer;
+    flex-shrink:0;
+    text-decoration:none;
+    -webkit-user-select:none;
+    user-select:none;
+  }
+
+  .btn-glass:active{ background:var(--glass-bg-hover); }
+
+  .topbar h2{
+    font-size:17px;
+    font-weight:600;
+    margin:0;
+    flex:1;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  /* ---------- Lista de sitios ---------- */
+  .list{
+    width:100%;
+    max-width:560px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+    padding:6px 18px 30px;
+  }
+
+  .site-card{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:16px 18px;
+    border-radius:20px;
+    background:var(--glass-bg);
+    border:1px solid var(--glass-border);
+    backdrop-filter:blur(22px) saturate(180%);
+    -webkit-backdrop-filter:blur(22px) saturate(180%);
+    box-shadow:var(--glass-shadow);
+    cursor:pointer;
+    -webkit-user-select:none;
+    user-select:none;
+  }
+
+  .site-card:active{ background:var(--glass-bg-hover); transform:scale(0.98); }
+
+  .site-name{ font-size:15px; font-weight:600; }
+  .site-url{ font-size:11.5px; color:var(--text-sub); margin-top:3px; word-break:break-all; }
+  .chevron{ font-size:18px; color:var(--text-sub); margin-left:10px; flex-shrink:0; }
+
+  .empty-msg{
+    color:var(--text-sub);
+    font-size:13px;
+    text-align:center;
+    margin-top:40px;
+    padding:0 30px;
+    line-height:1.5;
+  }
+
+  /* ---------- Visor embebido (iframe) ---------- */
+  .frame-wrap{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:#000;
+    overflow:hidden;
+  }
+
+  .frame-wrap.active{ display:block; }
+
+  .frame-stage{
+    position:absolute;
+    inset:0;
+    transition:transform .35s ease;
+    transform-origin:center center;
+  }
+
+  /* Cuando está "rotado" para simular horizontal en un teléfono en vertical */
+  .frame-stage.rotated{
+    width:100vh;
+    height:100vw;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%) rotate(90deg);
+  }
+
+  iframe{
+    width:100%;
+    height:100%;
+    border:none;
+    background:#fff;
+    display:block;
+  }
+
+  /* ---------- Botón flotante de controles ---------- */
+  .fab{
+    position:fixed;
+    top:calc(18px + env(safe-area-inset-top, 0px));
+    left:18px;
+    width:46px;
+    height:46px;
+    border-radius:16px;
+    background:var(--glass-bg);
+    border:1px solid var(--glass-border);
+    backdrop-filter:blur(20px) saturate(180%);
+    -webkit-backdrop-filter:blur(20px) saturate(180%);
+    box-shadow:var(--glass-shadow);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:20px;
+    color:var(--text-main);
+    z-index:20;
+    cursor:pointer;
+    -webkit-user-select:none;
+    user-select:none;
+    transition:opacity .3s ease, transform .3s ease;
+  }
+
+  .fab.hidden-fab{ opacity:0; pointer-events:none; transform:scale(0.85); }
+
+  .controls-panel{
+    position:fixed;
+    top:calc(18px + env(safe-area-inset-top, 0px));
+    left:18px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    padding:10px;
+    border-radius:22px;
+    background:var(--glass-bg);
+    border:1px solid var(--glass-border);
+    backdrop-filter:blur(24px) saturate(180%);
+    -webkit-backdrop-filter:blur(24px) saturate(180%);
+    box-shadow:var(--glass-shadow);
+    z-index:21;
+    opacity:0;
+    pointer-events:none;
+    transform:scale(0.9);
+    transform-origin:top left;
+    transition:opacity .25s ease, transform .25s ease;
+  }
+
+  .controls-panel.open{
+    opacity:1;
+    pointer-events:auto;
+    transform:scale(1);
+  }
+
+  .ctrl-btn{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px 14px;
+    border-radius:14px;
+    background:rgba(255,255,255,0.06);
+    color:var(--text-main);
+    font-size:13.5px;
+    font-weight:500;
+    white-space:nowrap;
+    cursor:pointer;
+    -webkit-user-select:none;
+    user-select:none;
+  }
+
+  .ctrl-btn:active{ background:rgba(255,255,255,0.16); }
+  .ctrl-btn .ico{ font-size:16px; width:18px; text-align:center; }
+
+  .ctrl-divider{
+    height:1px;
+    background:rgba(255,255,255,0.15);
+    margin:2px 6px;
+  }
+</style>
+</head>
+<body>
+
+  <div class="topbar">
+    <a class="btn-glass" href="index.html">‹</a>
+    <h2 id="pageTitle">Visualizador</h2>
+  </div>
+
+  <div class="list" id="list"></div>
+  <div class="empty-msg" id="emptyMsg" style="display:none"></div>
+
+  <!-- Visor embebido -->
+  <div class="frame-wrap" id="frameWrap">
+    <div class="frame-stage" id="frameStage">
+      <iframe id="frame" src=""></iframe>
+    </div>
+  </div>
+
+  <!-- Botón flotante + panel de controles (solo visible dentro del visor embebido) -->
+  <div class="fab" id="fab" style="display:none">⚙︎</div>
+  <div class="controls-panel" id="controlsPanel">
+    <div class="ctrl-btn" id="ctrlBack"><span class="ico">‹</span> Volver a la lista</div>
+    <div class="ctrl-divider"></div>
+    <div class="ctrl-btn" id="ctrlRotate"><span class="ico">⤾</span> Girar orientación</div>
+    <div class="ctrl-btn" id="ctrlReset"><span class="ico">↻</span> Reiniciar página</div>
+    <div class="ctrl-btn" id="ctrlFullscreen"><span class="ico">⛶</span> Pantalla completa</div>
+    <div class="ctrl-btn" id="ctrlOpenTab"><span class="ico">↗</span> Abrir en pestaña</div>
+  </div>
+
+<script>
+/*
+  ============================================================
+  Este visor recibe dos parámetros por la URL:
+    ?data=sitios.json   -> archivo JSON con la lista de links
+    &title=Nombre       -> título que se muestra arriba
+
+  El JSON debe tener esta forma:
+  {
+    "sitios": [
+      { "nombre": "Mi Página", "url": "https://usuario.github.io/repo/" }
+    ]
+  }
+
+  Para agregar más sitios, solo edita ese JSON. No hay que tocar este archivo.
+  ============================================================
+*/
+
+const params = new URLSearchParams(window.location.search);
+const dataFile = params.get("data") || "sitios.json";
+const pageTitle = params.get("title") || "Visualizador";
+
+document.getElementById("pageTitle").textContent = decodeURIComponent(pageTitle);
+
+let currentUrl = "";
+let controlsOpen = false;
+let hideTimer = null;
+
+async function loadSites(){
+  try{
+    const res = await fetch(dataFile, { cache: "no-store" });
+    if(!res.ok) throw new Error("no-ok");
+    const data = await res.json();
+    render(data.sitios || []);
+  }catch(e){
+    document.getElementById("emptyMsg").style.display = "block";
+    document.getElementById("emptyMsg").textContent =
+      `No se pudo cargar "${dataFile}". Verifica que el archivo exista en este repositorio.`;
+  }
+}
+
+function render(sitios){
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+
+  if(!sitios.length){
+    document.getElementById("emptyMsg").style.display = "block";
+    document.getElementById("emptyMsg").textContent = `Agrega sitios en ${dataFile} para verlos aquí.`;
+    return;
+  }
+
+  sitios.forEach(sitio => {
+    const card = document.createElement("div");
+    card.className = "site-card";
+    card.onclick = () => openFrame(sitio.nombre, sitio.url);
+    card.innerHTML = `
+      <div>
+        <div class="site-name">${sitio.nombre || "Sin nombre"}</div>
+        <div class="site-url">${sitio.url || ""}</div>
+      </div>
+      <div class="chevron">›</div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+/* ---------- Visor embebido ---------- */
+
+function openFrame(nombre, url){
+  currentUrl = url;
+  document.getElementById("frame").src = url;
+  document.getElementById("frameWrap").classList.add("active");
+  document.getElementById("fab").style.display = "flex";
+  document.body.style.overflow = "hidden";
+  scheduleHide();
+}
+
+function closeFrame(){
+  document.getElementById("frameWrap").classList.remove("active");
+  document.getElementById("frame").src = "";
+  document.getElementById("fab").style.display = "none";
+  document.getElementById("frameStage").classList.remove("rotated");
+  closeControls();
+  document.body.style.overflow = "";
+}
+
+/* ---------- Botón flotante + panel ---------- */
+
+const fab = document.getElementById("fab");
+const panel = document.getElementById("controlsPanel");
+
+fab.addEventListener("click", () => {
+  controlsOpen ? closeControls() : openControls();
+});
+
+function openControls(){
+  controlsOpen = true;
+  panel.classList.add("open");
+  fab.classList.add("hidden-fab");
+  clearTimeout(hideTimer);
+  scheduleHide();
+}
+
+function closeControls(){
+  controlsOpen = false;
+  panel.classList.remove("open");
+  fab.classList.remove("hidden-fab");
+  clearTimeout(hideTimer);
+}
+
+function scheduleHide(){
+  clearTimeout(hideTimer);
+  hideTimer = setTimeout(() => {
+    if(controlsOpen) closeControls();
+  }, 4000);
+}
+
+panel.addEventListener("click", () => scheduleHide());
+
+document.getElementById("ctrlBack").onclick = () => closeFrame();
+
+document.getElementById("ctrlRotate").onclick = () => {
+  document.getElementById("frameStage").classList.toggle("rotated");
+};
+
+document.getElementById("ctrlReset").onclick = () => {
+  const f = document.getElementById("frame");
+  f.src = currentUrl;
+};
+
+document.getElementById("ctrlFullscreen").onclick = () => {
+  const wrap = document.getElementById("frameWrap");
+  if(!document.fullscreenElement){
+    (wrap.requestFullscreen || wrap.webkitRequestFullscreen || function(){}).call(wrap);
+  }else{
+    (document.exitFullscreen || document.webkitExitFullscreen || function(){}).call(document);
+  }
+};
+
+document.getElementById("ctrlOpenTab").onclick = () => {
+  window.open(currentUrl, "_blank", "noopener");
+};
+
+loadSites();
+</script>
+</body>
+</html>

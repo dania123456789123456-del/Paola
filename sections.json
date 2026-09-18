@@ -1,0 +1,32 @@
+{
+  "sections": [
+    {
+      "id": "web-viewer",
+      "title": "Visualizador Web",
+      "subtitle": "Páginas y código en GitHub",
+      "icon": "globe",
+      "color": "blue",
+      "type": "viewer",
+      "dataFile": "sitios.json"
+    },
+    {
+      "id": "pdf-book",
+      "title": "Visor de Libro PDF",
+      "subtitle": "BookLeaf Reader",
+      "icon": "book",
+      "color": "orange",
+      "type": "redirect",
+      "url": "https://TU-USUARIO.github.io/TU-REPO-BOOKLEAF/"
+    },
+    {
+      "id": "mini-game",
+      "title": "Mini Juego",
+      "subtitle": "Próximamente",
+      "icon": "game",
+      "color": "purple",
+      "type": "redirect",
+      "url": "",
+      "hidden": true
+    }
+  ]
+}
