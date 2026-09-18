@@ -25,26 +25,31 @@
     margin:0;
     font-family:-apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
     color:var(--text-main);
+    overflow:hidden; /* sin scroll vertical de la página, solo el carrusel se mueve en horizontal */
   }
 
   body{
-    /* Puedes poner tu propia imagen de fondo aquí (link directo a una imagen) */
+    /* ====================================================
+       🖼  PON AQUÍ TU LINK DE IMAGEN DE FONDO (dentro de las comillas de url())
+       Ejemplo: url("https://raw.githubusercontent.com/usuario/repo/main/fondo.jpg")
+       ==================================================== */
     background:
       linear-gradient(180deg, rgba(10,12,20,0.55), rgba(10,12,20,0.85)),
       url("") center/cover no-repeat fixed,
       radial-gradient(circle at 20% 20%, #2b3350 0%, #0d0f18 55%, #050608 100%);
-    min-height:100vh;
+    height:100vh;
+    height:100dvh;
     display:flex;
     flex-direction:column;
+    justify-content:center;
     align-items:center;
-    padding:32px 0 60px;
-    overflow-x:hidden;
+    padding:0;
+    overflow:hidden;
   }
 
   header{
     text-align:center;
-    margin-bottom:34px;
-    margin-top:env(safe-area-inset-top, 10px);
+    margin-bottom:28px;
     padding:0 20px;
   }
 
@@ -67,8 +72,9 @@
     display:flex;
     flex-direction:row;
     gap:16px;
-    padding:6px 20px 20px;
+    padding:6px 20px;
     overflow-x:auto;
+    overflow-y:hidden;
     scroll-snap-type:x mandatory;
     -webkit-overflow-scrolling:touch;
   }
@@ -88,8 +94,8 @@
     border-radius:28px;
     background:var(--glass-bg);
     border:1px solid var(--glass-border);
-    backdrop-filter:blur(22px) saturate(180%);
-    -webkit-backdrop-filter:blur(22px) saturate(180%);
+    backdrop-filter:blur(28px) saturate(200%);
+    -webkit-backdrop-filter:blur(28px) saturate(200%);
     box-shadow:var(--glass-shadow);
     cursor:pointer;
     text-decoration:none;
@@ -207,12 +213,6 @@
     line-height:1.5;
   }
 
-  footer{
-    margin-top:30px;
-    font-size:11px;
-    color:rgba(245,246,250,0.35);
-    text-align:center;
-  }
 </style>
 </head>
 <body>
@@ -226,8 +226,6 @@
   <div class="empty-msg" id="emptyMsg" style="display:none">
     No se pudo cargar <code>sections.json</code>. Verifica que el archivo exista en el mismo repositorio.
   </div>
-
-  <footer>Alojado en GitHub Pages</footer>
 
 <script>
 /*
