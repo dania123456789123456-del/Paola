@@ -3,7 +3,7 @@
     {
       "id": "web-viewer",
       "title": "Visualizador Web",
-      "subtitle": "Páginas y código en GitHub",
+      "subtitle": "Páginas y código",
       "icon": "globe",
       "color": "blue",
       "type": "viewer",
